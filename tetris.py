@@ -68,7 +68,7 @@ while True:
         if out_of_bounds(figure[i]):
             figure = original_figure
             anim_limit = 1000
-            # break
+            break
 
     anim_count += anim_speed
     if anim_count > anim_limit:
