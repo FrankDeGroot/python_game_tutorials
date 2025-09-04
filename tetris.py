@@ -44,8 +44,16 @@ def out_of_bounds(r: pygame.Rect) -> bool:
 preview_area_x = W * TILE + (GAME_RES[0] - W * TILE) // 2
 preview_area_y = (GAME_RES[1] // 2)
 
+def move_figure(figure: list[pygame.Rect], dx: int):
+    original_figure = deepcopy(figure)
+    for rect in figure:
+        rect.x += dx
+        if out_of_bounds(rect):
+            figure = original_figure
+            break
+    return figure
+
 while True:
-    dx = 0
     rotate = False
     game_sc.fill("black")
 
@@ -54,66 +62,58 @@ while True:
             exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                dx = -1
+                figure = move_figure(figure, -1)
             elif event.key == pygame.K_RIGHT:
-                dx = 1
+                figure = move_figure(figure, 1)
             elif event.key == pygame.K_DOWN:
                 anim_limit = 100
             elif event.key == pygame.K_UP:
                 rotate = True
 
-    original_figure = deepcopy(figure)
-    for i in range(len(figure)):
-        figure[i].x += dx
-        if out_of_bounds(figure[i]):
-            figure = original_figure
-            anim_limit = 1000
-            break
-
     anim_count += anim_speed
     if anim_count > anim_limit:
         anim_count = 0
         original_figure = deepcopy(figure)
-        for i in range(len(figure)):
-            figure[i].y += 1
-            if out_of_bounds(figure[i]):
-                for i in range(len(figure)):
-                    field[original_figure[i].y][original_figure[i].x] = figure_color
+        for rect in figure:
+            rect.y += 1
+            if out_of_bounds(rect):
+                for orig_rect in original_figure:
+                    field[orig_rect.y][orig_rect.x] = figure_color
                 figure, figure_color = next_figure, next_figure_color
                 next_figure, next_figure_color = deepcopy(choice(figures))
                 anim_limit = 2000
                 score += 1
-                anim_speed += 10
+                anim_speed += 1
                 break
 
     if rotate:
         center = figure[0]
         original_figure = deepcopy(figure)
-        for i in range(len(figure)):
-            x = figure[i].x - center.x
-            y = figure[i].y - center.y
-            figure[i].x = center.x - y
-            figure[i].y = center.y + x
-            if out_of_bounds(figure[i]) or out_of_bounds(figure[i]):
+        for rect in figure[1:]:
+            x = rect.x - center.x
+            y = rect.y - center.y
+            rect.x = center.x - y
+            rect.y = center.y + x
+            if out_of_bounds(rect) or out_of_bounds(rect):
                 figure = original_figure
                 break
 
     line = H - 1
     for row in range(H - 1, -1, -1):
         count = 0
-        for i in range(W):
-            if field[row][i] is not None:
+        for i, col in enumerate(field[row]):
+            if col is not None:
                 count += 1
-            field[line][i] = field[row][i]
+            field[line][i] = col
         if count < W:
             line -= 1
 
-    for i_rect in grid:
-        pygame.draw.rect(game_sc, (40, 40, 40), i_rect, 1)
+    for rect in grid:
+        pygame.draw.rect(game_sc, (40, 40, 40), rect, 1)
 
-    for i in range(len(figure)):
-        figure_rect.x = figure[i].x * TILE
-        figure_rect.y = figure[i].y * TILE
+    for rect in figure:
+        figure_rect.x = rect.x * TILE
+        figure_rect.y = rect.y * TILE
         pygame.draw.rect(game_sc, figure_color, figure_rect)
 
     for y, row in enumerate(field):
@@ -127,7 +127,6 @@ while True:
         figure_rect.y = int(preview_area_y + (rect.y - next_figure[0].y) * TILE)
         pygame.draw.rect(game_sc, next_figure_color, figure_rect)
 
-    # Draw score (add after drawing everything else, before pygame.display.flip())
     font = pygame.font.SysFont("Press Start 2P, Courier New, monospace", 32)
     score_surf = font.render(f"Score: {score}", True, (255, 255, 255))
     score_rect = score_surf.get_rect()
