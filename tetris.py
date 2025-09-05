@@ -103,7 +103,7 @@ pygame.init()
 game_sc = pygame.display.set_mode(GAME_RES)
 clock = pygame.time.Clock()
 field: list[list[pygame.Color | None]] = [[None for _ in range(W)] for _ in range(H)]
-anim_count, anim_speed, anim_limit = 0, 60, 2000
+drop_count, drop_speed, drop_limit = 0, 60, 2000
 next_figure, next_figure_color = choose_figure()
 figure, figure_color = choose_figure()
 score = 0
@@ -118,22 +118,22 @@ while True:
             elif event.key == pygame.K_RIGHT:
                 figure = move_figure(figure, 1)
             elif event.key == pygame.K_DOWN:
-                anim_limit = 100
+                drop_limit = 100
             elif event.key == pygame.K_UP:
                 figure = rotate_figure(figure)
 
-    anim_count += anim_speed
-    if anim_count > anim_limit:
-        anim_count = 0
+    drop_count += drop_speed
+    if drop_count > drop_limit:
+        drop_count = 0
         figure, bumped = drop_figure(figure)
         if bumped:
             for rect in figure:
                 field[rect.y][rect.x] = figure_color
             figure, figure_color = next_figure, next_figure_color
             next_figure, next_figure_color = choose_figure()
-            anim_limit = 2000
+            drop_limit = 2000
             score += 1
-            anim_speed += 1
+            drop_speed += 1
 
     game_sc.fill("black")
     clear_lines(field)
