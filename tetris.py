@@ -24,13 +24,16 @@ FIGURES = [
 ]
 FIGURE_RECT = pygame.Rect(1, 1, TILE - 2, TILE - 2)
 
+type Field = list[list[pygame.Color | None]]
+type Figure = list[pygame.Rect]
+
 def choose_figure():
     return deepcopy(choice(FIGURES))
 
 def out_of_bounds(r: pygame.Rect) -> bool:
     return r.x < 0 or r.x >= W or r.y >= H or field[r.y][r.x] is not None
 
-def move_figure(figure: list[pygame.Rect], dx: int):
+def move_figure(figure: Figure, dx: int):
     original_figure = deepcopy(figure)
     for rect in figure:
         rect.x += dx
@@ -38,7 +41,7 @@ def move_figure(figure: list[pygame.Rect], dx: int):
             return original_figure
     return figure
 
-def drop_figure(figure: list[pygame.Rect]):
+def drop_figure(figure: Figure):
     original_figure = deepcopy(figure)
     for rect in figure:
         rect.y += 1
@@ -46,7 +49,7 @@ def drop_figure(figure: list[pygame.Rect]):
             return original_figure, True
     return figure, False
 
-def rotate_figure(figure: list[pygame.Rect]):
+def rotate_figure(figure: Figure):
     center = figure[0]
     original_figure = deepcopy(figure)
     for rect in figure[1:]:
@@ -58,7 +61,7 @@ def rotate_figure(figure: list[pygame.Rect]):
             return original_figure
     return figure
 
-def clear_lines(field: list[list[pygame.Color | None]]):
+def clear_lines(field: Field):
     line = H - 1
     for row in range(H - 1, -1, -1):
         count = 0
@@ -73,20 +76,20 @@ def draw_grid():
     for rect in GRID:
         pygame.draw.rect(game_sc, (40, 40, 40), rect, 1)
 
-def draw_figure(figure: list[pygame.Rect]):
+def draw_figure(figure: Figure):
     for rect in figure:
         FIGURE_RECT.x = rect.x * TILE
         FIGURE_RECT.y = rect.y * TILE
         pygame.draw.rect(game_sc, figure_color, FIGURE_RECT)
 
-def draw_field(field: list[list[pygame.Color | None]]):
+def draw_field(field: Field):
     for y, row in enumerate(field):
         for x, col in enumerate(row):
             if col is not None:
                 FIGURE_RECT.x, FIGURE_RECT.y = x * TILE, y * TILE
                 pygame.draw.rect(game_sc, col, FIGURE_RECT)
 
-def draw_next_figure(next_figure: list[pygame.Rect]):
+def draw_next_figure(next_figure: Figure):
     for rect in next_figure:
         FIGURE_RECT.x = int(PREVIEW_AREA_X + (rect.x - next_figure[0].x) * TILE)
         FIGURE_RECT.y = int(PREVIEW_AREA_Y + (rect.y - next_figure[0].y) * TILE)
@@ -102,7 +105,7 @@ def draw_score(score: int):
 pygame.init()
 game_sc = pygame.display.set_mode(GAME_RES)
 clock = pygame.time.Clock()
-field: list[list[pygame.Color | None]] = [[None for _ in range(W)] for _ in range(H)]
+field: Field = [[None for _ in range(W)] for _ in range(H)]
 drop_count, drop_speed, drop_limit = 0, 60, 2000
 next_figure, next_figure_color = choose_figure()
 figure, figure_color = choose_figure()
