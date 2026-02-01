@@ -1,6 +1,7 @@
-import pygame as pg
 from random import choice
 from typing import Callable, NamedTuple
+
+import pygame as pg
 
 FIELD_WIDTH, FIELD_HEIGHT = FIELD_COUNT = 16, 16
 CELL_SIZE = 32
@@ -14,6 +15,7 @@ COLORS = [
     pg.Color(255, 0, 255),
     pg.Color(255, 255, 0),
 ]
+CLEAR = pg.Color(0, 0, 0)
 
 type Row = list[pg.Color]
 type Field = list[Row]
@@ -103,11 +105,11 @@ def right(c: Cell):
 
 
 def get_matches(field: Field, cell: Cell):
-    def blup(dir: Callable[[Cell], Cell]):
+    def get_same_colors(dir: Callable[[Cell], Cell]):
         return list(c for c in while_same_color(field, cell, dir))
 
-    hor = blup(left) + [cell] + blup(right)
-    ver = blup(up) + [cell] + blup(down)
+    hor = get_same_colors(left) + [cell] + get_same_colors(right)
+    ver = get_same_colors(up) + [cell] + get_same_colors(down)
     return [s for s in [hor, ver] if len(s) > 2]
 
 
@@ -124,7 +126,7 @@ def remove_matches(field: Field, selected: Selected, pos: list[int]):
             if matches:
                 for match in matches:
                     for cell in match:
-                        set_color(field, cell, pg.Color(0, 0, 0))
+                        set_color(field, cell, CLEAR)
             else:
                 swap_colors(field, selected, next_selected)
             return None
