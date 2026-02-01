@@ -1,7 +1,9 @@
 [project]
 name = "python-game-tutorials"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python Game Tutorials using pygame"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pygame-ce>=2.5.6",
+]
