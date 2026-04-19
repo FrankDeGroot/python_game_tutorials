@@ -127,6 +127,15 @@ def remove_matches(field: Field, selected: Selected, pos: list[int]):
                 for match in matches:
                     for cell in match:
                         set_color(field, cell, CLEAR)
+                for match in matches:
+                    min_col = min(cell.col for cell in match)
+                    max_col = max(cell.col for cell in match)
+                    for col in range(min_col, max_col + 1):
+                        rows_in_col = [cell.row for cell in match if cell.col == col]
+                        if rows_in_col:
+                            min_row = min(rows_in_col)
+                            max_row = max(rows_in_col)
+                            row_span = max_row - min_row
             else:
                 swap_colors(field, selected, next_selected)
             return None
